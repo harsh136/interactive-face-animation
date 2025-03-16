@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Character</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: hidden;
+        }
+        body {
+    background:
+        linear-gradient(
+            to bottom,
+            #0a0a12 0%,
+            #090714 100%
+        ),
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(60, 55, 110, 0.4) 0%,
+            rgba(18, 15, 40, 0.8) 40%,
+            #080611 100%
+        ),
+        linear-gradient(
+            15deg,
+            rgba(12, 10, 28, 0.9) 30%,
+            transparent 100%
+        );
+    background-blend-mode: normal, screen, multiply;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes lightPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.1;
+        transform: scale(1.02) rotate(0.5deg);
+    }
+}
+        .face {
+            width: 120px;
+            height: 120px;
+            border: 10px solid #2a1a4a;
+            box-sizing: border-box;
+            background-color: #5442ce;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(106, 90, 205, 0.5) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, rgba(31, 31, 31, 0.3) 0%, transparent 100%),
+                radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+            background-blend-mode: multiply;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 180px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(84, 66, 206, 0.2);
+        }
+        .eye {
+            width: 15px;
+            height: 25px;
+            background-color: white;
+            border-radius: 20px;
+            position: absolute;
+            transition: height 0.2s ease, transform 0.1s ease;
+        }
+        .eye.left { left: 25%; }
+        .eye.right { right: 25%; }
+        .eye.blink {
+            height: 2px;
+        }
+        .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: float 1.8s ease-out forwards;
+    z-index: -1;
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.7),
+        0 0 30px rgba(255, 255, 255, 0.5);
+    filter: brightness(1.2);
+}
+        @keyframes float {
+            0% {
+                opacity: 0.9;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="face">
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+    </div>
+    <script>
+        const face = document.querySelector('.face');
+        const eyes = document.querySelectorAll('.eye');
+        let blinkInterval;
+        let blinkCount = 0;
+
+        function followCursor(e) {
+            const { clientX: mouseX, clientY: mouseY } = e;
+            const { left, top, width, height } = face.getBoundingClientRect();
+            const faceCenterX = left + width / 2;
+            const faceCenterY = top + height / 2;
+
+            const angle = Math.atan2(mouseY - faceCenterY, mouseX - faceCenterX);
+            const distance = Math.min(15, Math.hypot(mouseX - faceCenterX, mouseY - faceCenterY) / 5);
+
+            eyes.forEach(eye => {
+                eye.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance * 1.2}px)`;
+            });
+        }
+
+        function blink() {
+            eyes.forEach(eye => eye.classList.add('blink'));
+            setTimeout(() => {
+                eyes.forEach(eye => eye.classList.remove('blink'));
+            }, 200);
+        }
+
+        function startBlinking() {
+            blinkInterval = setInterval(() => {
+                blink();
+                if (++blinkCount % 2 !== 0) setTimeout(blink, 300);
+            }, 3000);
+        }
+
+        function hop() {
+            face.style.transform = 'translateY(-30px)';
+            setTimeout(() => {
+                face.style.transform = 'translateY(0)';
+            }, 300);
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const rect = face.getBoundingClientRect();
+            const radius = rect.width/2;
+            
+            const angle = Math.random() * Math.PI * 2;
+            const baseX = rect.left + radius + Math.cos(angle) * (radius - 8);
+            const baseY = rect.top + radius + Math.sin(angle) * (radius - 8);
+            
+            const distance = 70 + Math.random() * 100;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            particle.style.setProperty('--tx', `${tx}px`);
+            particle.style.setProperty('--ty', `${ty}px`);
+            particle.style.left = `${baseX + (Math.random() * 30 - 15)}px`;
+            particle.style.top = `${baseY + (Math.random() * 30 - 15)}px`;
+            
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 1800);
+        }
+
+        document.addEventListener('mousemove', followCursor);
+        face.addEventListener('click', hop);
+        startBlinking();
+        
+        setInterval(() => {
+            if (Math.random() > 0.5) createParticle();
+        }, 300);
+    </script>
+</body>
+</html>
