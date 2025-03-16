@@ -2,6 +2,8 @@
 
 A simple and fun web project showcasing an interactive animated character face built with HTML, CSS, and JavaScript. The character's eyes follow your mouse cursor, it blinks periodically, hops on click, and emits sparkling particles!
 
+[**View Live Demo**](https://harsh136.github.io/interactive-face-animation/)
+
 Here's a screenshot of the character in action:
 
 ![Screenshot of animated character](images/image.png)
